@@ -1,6 +1,7 @@
 using log4net;
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.HttpLogging;
+using System.Security.Cryptography;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,24 +29,43 @@ if (app.Environment.IsDevelopment())
 app.UseHttpLogging();//start the http logs
 log4net.Config.XmlConfigurator.Configure(new FileInfo("log4net.config")); //config log4net
 
+string path = "/data/upload/";
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && !Directory.Exists("/data/upload/"))
 {
-    Directory.CreateDirectory("/data/upload/");//linux os upload path is /data/upload
+    path = "/data/upload/";
+    Directory.CreateDirectory(path);//linux os upload path is /data/upload
 }
 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !Directory.Exists(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "upload")))
 {
-    Directory.CreateDirectory(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "upload"));//windows os upload folder is upload in the current directory
+    path = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "upload");
+    Directory.CreateDirectory(path);//windows os upload folder is upload in the current directory
 }
 
 
+var md5 = MD5.Create();
+string key = BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes("default"))).Replace("-", "");
+ILog log = LogManager.GetLogger(typeof(Program));
 
-app.MapGet("/weatherforecast", (IHttpContextAccessor _httpContextAccessor) =>
+
+//viewed the files
+app.MapGet("/ls", (IHttpContextAccessor _httpContextAccessor) =>
 {
-    return "123";
-}).WithName("GetWeatherForecast");
+    log.Info($"viewed upload files,ip:{_httpContextAccessor.HttpContext.Connection.RemoteIpAddress}{_httpContextAccessor.HttpContext.Connection.RemotePort}");
+    return "1";
+});
 
 
+app.MapPost("/pos", (IHttpContextAccessor _httpContextAccessor) =>
+{
+    log.Info($"viewed upload files,ip:{_httpContextAccessor.HttpContext.Connection.RemoteIpAddress}{_httpContextAccessor.HttpContext.Connection.RemotePort}");
+    return "1";
+});
 
+
+app.MapPost("/set", (IHttpContextAccessor _httpContextAccessor) =>
+{
+
+});
 
 app.Run();
 
