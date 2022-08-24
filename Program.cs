@@ -30,15 +30,17 @@ app.UseHttpLogging();//start the http logs
 log4net.Config.XmlConfigurator.Configure(new FileInfo("log4net.config")); //config log4net
 
 string path = "/data/upload/";
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && !Directory.Exists("/data/upload/"))
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 {
     path = "/data/upload/";
-    Directory.CreateDirectory(path);//linux os upload path is /data/upload
+    if (!Directory.Exists(path)) Directory.CreateDirectory(path);//linux os upload path is /data/upload
+
 }
-else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !Directory.Exists(Path.Combine(System.IO.Directory.GetCurrentDirectory(), "upload")))
+else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
     path = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "upload");
-    Directory.CreateDirectory(path);//windows os upload folder is upload in the current directory
+    if (!Directory.Exists(path)) Directory.CreateDirectory(path);//windows os upload folder is upload in the current directory
+
 }
 
 
@@ -51,14 +53,40 @@ ILog log = LogManager.GetLogger(typeof(Program));
 app.MapGet("/ls", (IHttpContextAccessor _httpContextAccessor) =>
 {
     log.Info($"viewed upload files,ip:{_httpContextAccessor.HttpContext.Connection.RemoteIpAddress}{_httpContextAccessor.HttpContext.Connection.RemotePort}");
-    return "1";
+
+    DirectoryInfo dic = new DirectoryInfo(path);
+
+    FileInfo[] files = dic.GetFiles();
+    string result = string.Empty;
+    foreach (var item in files)
+    {
+        result += item.Name + " " + item.LastWriteTime + " " + item.Length + "\r\n";
+    }
+
+    DirectoryInfo[] dics = dic.GetDirectories();
+    foreach (var item in dics)
+    {
+        result += item.Name + " " + item.LastWriteTime + " " + item.CreationTime + "\r\n";
+    }
+    return result;
 });
 
 
-app.MapPost("/pos", (IHttpContextAccessor _httpContextAccessor) =>
+app.MapPost("/pos",  (IHttpContextAccessor _httpContextAccessor, IFormFile file) =>
 {
-    log.Info($"viewed upload files,ip:{_httpContextAccessor.HttpContext.Connection.RemoteIpAddress}{_httpContextAccessor.HttpContext.Connection.RemotePort}");
-    return "1";
+    log.Info($"upload file,ip:{_httpContextAccessor.HttpContext.Connection.RemoteIpAddress}{_httpContextAccessor.HttpContext.Connection.RemotePort}");
+    string filePath = path;
+    if (file.Length > 0)
+    {
+        var full_name = path + file.Name;
+        using (var stream = System.IO.File.Create(filePath))
+        {
+             file.CopyToAsync(stream);
+            return "1";
+        }
+    }
+
+    return "0";
 });
 
 
