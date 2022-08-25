@@ -2,6 +2,7 @@ using log4net;
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.HttpLogging;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,16 @@ builder.Services.AddHttpLogging(options =>
     options.ResponseHeaders.Add("Server");
 });
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+
+// 200 MB
+const int maxRequestLimit = 209715200;
+// If using Kestrel
+builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = maxRequestLimit;//default max upload file size is 30 MB
+});
+
 
 var app = builder.Build();
 
@@ -71,29 +82,36 @@ app.MapGet("/ls", (IHttpContextAccessor _httpContextAccessor) =>
     return result;
 });
 
-
-app.MapPost("/pos",  (IHttpContextAccessor _httpContextAccessor, IFormFile file) =>
+app.MapPost("/pos", async (IHttpContextAccessor _httpContextAccessor, HttpRequest request) =>
 {
     log.Info($"upload file,ip:{_httpContextAccessor.HttpContext.Connection.RemoteIpAddress}{_httpContextAccessor.HttpContext.Connection.RemotePort}");
-    string filePath = path;
-    if (file.Length > 0)
+    var form = await request.ReadFormAsync();
+    if (!form.Keys.Contains("key")) return Results.BadRequest();
+    string tempKey = BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(form["key"]))).Replace("-", "");
+    if (tempKey != key) return Results.BadRequest();
+    foreach (var file in form.Files)
     {
-        var full_name = path + file.Name;
+        string filePath = Path.Combine(path, file.FileName);
         using (var stream = System.IO.File.Create(filePath))
         {
-             file.CopyToAsync(stream);
-            return "1";
+            await file.CopyToAsync(stream);
         }
     }
+    return Results.Ok(form.Files.First().FileName);
+}).Accepts<IFormFile>("multipart/form-data");
 
-    return "0";
-});
 
 
-app.MapPost("/set", (IHttpContextAccessor _httpContextAccessor) =>
+app.MapPost("/set", (IHttpContextAccessor _httpContextAccessor, string old_key, string new_key) =>
 {
-
+    if (BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(old_key))).Replace("-", "") == key)
+    {
+        key = BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(new_key))).Replace("-", "");
+        return Results.Ok(key);
+    }
+    return Results.BadRequest();
 });
 
 app.Run();
+
 
