@@ -2,7 +2,6 @@ using log4net;
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.HttpLogging;
 using System.Security.Cryptography;
-using Microsoft.AspNetCore.Http.Features;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +26,6 @@ builder.Services.Configure<Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServe
 {
     options.Limits.MaxRequestBodySize = maxRequestLimit;//default max upload file size is 30 MB
 });
-
 
 var app = builder.Build();
 
@@ -54,11 +52,9 @@ else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 
 }
 
-
 var md5 = MD5.Create();
 string key = BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes("default"))).Replace("-", "");
 ILog log = LogManager.GetLogger(typeof(Program));
-
 
 //viewed the files
 app.MapGet("/ls", (IHttpContextAccessor _httpContextAccessor) =>
@@ -100,8 +96,7 @@ app.MapPost("/pos", async (IHttpContextAccessor _httpContextAccessor, HttpReques
     return Results.Ok(form.Files.First().FileName);
 }).Accepts<IFormFile>("multipart/form-data");
 
-
-
+//set key
 app.MapPost("/set", (IHttpContextAccessor _httpContextAccessor, string old_key, string new_key) =>
 {
     if (BitConverter.ToString(md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(old_key))).Replace("-", "") == key)
