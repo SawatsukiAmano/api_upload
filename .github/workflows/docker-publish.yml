@@ -1,9 +1,9 @@
-name: Docker Image CI # workflow名称
+name: Publish image to Dockerhub # workflow名称
 
-on: # 配置出发
+on: # 配置触发
   push:
     tags: # tag更新时触发workflow
-      - '*'
+      - 'v*'
 
 jobs:
   push_to_registry:
