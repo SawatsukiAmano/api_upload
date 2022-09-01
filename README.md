@@ -12,7 +12,9 @@
 
 # How To Use
 > such as
+
 > IP: 7.7.7.7:7777
+
 > the default key is "default"
 
 ## Set Key

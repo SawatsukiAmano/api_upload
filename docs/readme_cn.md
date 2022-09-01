@@ -11,6 +11,7 @@
 
 # 使用
 > 环境IP为: 7.7.7.7:7777
+
 > 默认key是 "default"
 
 ## 设置key
@@ -90,7 +91,7 @@ print(response.text)
 ```
 
 ## 查看上传的文件
-direct browser access http://7.7.7.7:7777/ls
+浏览器打开地址 http://7.7.7.7:7777/ls
 
 
 # Docker 部署
