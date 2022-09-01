@@ -1,20 +1,18 @@
 # api_upload
-> an application interface,to use api to upload file,you can use such as postaman or apifox or runapi to post the files.
-> you can use docker and kubernets to deploy or use kestrel to run this application
-
+> 一个上传文件的接口，可以用podman、apifox、runapi等工具进行文件的上传
+> 可以在用docker或者kubernets去部署，或者使用kestrel进行托管部署
 
 [![ Build and Test .NET ](https://github.com/newreport/api_upload/actions/workflows/dotnet.yml/badge.svg)](https://github.com/newreport/api_upload/actions/workflows/dotnet.yml)   [![Publish image to Dockerhub](https://github.com/newreport/api_upload/actions/workflows/docker-image.yml/badge.svg)](https://github.com/newreport/api_upload/actions/workflows/docker-image.yml)
 
 <p align="center">
-<a href="/docs/readme_cn.md">简体中文</a>
+<a href="../Readme.md">English</a>
 </p>
 
-# How To Use
-> such as
-> IP: 7.7.7.7:7777
-> the default key is "default"
+# 使用
+> 环境IP为: 7.7.7.7:7777
+> 默认key是 "default"
 
-## Set Key
+## 设置key
 > JavaScript
 ```JavaScript
 var form = new FormData();
@@ -50,7 +48,7 @@ response = requests.request("POST", url, headers=headers, data=payload, files=fi
 print(response.text)
 ```
 
-## Post File
+## 上传文件
 > JavaScript
 ```JavaScript
 var form = new FormData();
@@ -90,13 +88,11 @@ print(response.text)
 
 ```
 
-## View Server Upload File
+## 查看上传的文件
 direct browser access http://7.7.7.7:7777/ls
 
 
-
-
-# Docker
+# Docker 部署
 [DockerHub](https://hub.docker.com/r/newreport/api_upload)
 ```bash
 docker pull newreport/api_upload
@@ -121,7 +117,7 @@ services:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: api-upload-deployment # your deployment name
+  name: api-upload-deployment # deloyment名称
 spec:
   selector:
     matchLabels:
@@ -134,7 +130,7 @@ spec:
     spec:
       affinity:
         podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
+          requiredDuringSchedulingIgnoredDuringExecution: # 反亲和性部署，以hostname进行区分
           - topologyKey: kubernetes.io/hostname
             labelSelector:
               matchExpressions:
@@ -144,7 +140,7 @@ spec:
                 - api-upload
       containers:
       - name: api-upload
-        image: newreport/api_upload # dockerhub image 
+        image: newreport/api_upload # dockerhub镜像名称
         ports:
         - containerPort: 80
           protocol: TCP
@@ -158,7 +154,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: api-upload-service
+  name: api-upload-service # service名称
 spec:
   selector:
     app: api-upload
@@ -167,6 +163,6 @@ spec:
     protocol: TCP
     port: 80
     targetPort: 80
-    nodePort: 31111
+    nodePort: 31111 # nodeport端口
   type: NodePort
 ```
