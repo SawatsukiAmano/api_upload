@@ -1,6 +1,7 @@
 # api_upload
 > 一个上传文件的接口，可以用podman、apifox、runapi等工具进行文件的上传
-> 可以在用docker或者kubernets去部署，或者使用kestrel进行托管部署
+
+> 可以用docker或者kubernets去部署，或者使用kestrel进行托管部署
 
 [![ Build and Test .NET ](https://github.com/newreport/api_upload/actions/workflows/dotnet.yml/badge.svg)](https://github.com/newreport/api_upload/actions/workflows/dotnet.yml)   [![Publish image to Dockerhub](https://github.com/newreport/api_upload/actions/workflows/docker-image.yml/badge.svg)](https://github.com/newreport/api_upload/actions/workflows/docker-image.yml)
 
