@@ -6,7 +6,7 @@
 [![ Build and Test .NET ](https://github.com/newreport/api_upload/actions/workflows/dotnet.yml/badge.svg)](https://github.com/newreport/api_upload/actions/workflows/dotnet.yml)   [![Publish image to Dockerhub](https://github.com/newreport/api_upload/actions/workflows/docker-image.yml/badge.svg)](https://github.com/newreport/api_upload/actions/workflows/docker-image.yml)
 
 <p align="center">
-<a href="../Readme.md">English</a>
+<a href="../README.md">English</a>
 </p>
 
 # 使用
