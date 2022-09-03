@@ -111,8 +111,8 @@ version: '3.8'
 services:
   nginx:
     restart: always
-    image: nginx:alpine
-    container_name: nginx
+    image: newreport/api_upload
+    container_name: api_upload
     ports:
       - 7777:80
     volumes:
